@@ -1,0 +1,37 @@
+services:
+  - type: web
+    name: harbor-pm-api
+    runtime: node
+    rootDir: .
+    buildCommand: npm install && npm run db:generate --workspace backend
+    startCommand: npm run start --workspace backend
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 4000
+      - key: CLIENT_URL
+        sync: false
+      - key: JWT_SECRET
+        generateValue: true
+      - key: DATABASE_URL
+        fromDatabase:
+          name: harbor-pm-postgres
+          property: connectionString
+
+  - type: web
+    name: harbor-pm-web
+    runtime: static
+    rootDir: .
+    buildCommand: npm install && npm run build --workspace frontend
+    staticPublishPath: frontend/dist
+    pullRequestPreviewsEnabled: true
+    envVars:
+      - key: VITE_API_URL
+        sync: false
+
+databases:
+  - name: harbor-pm-postgres
+    databaseName: harbor_pm
+    user: harbor_pm_user

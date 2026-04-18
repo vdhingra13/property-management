@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Harbor PM</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="brand-block">
+        <p class="eyebrow">Property Command Center</p>
+        <h1>Harbor PM</h1>
+        <p class="brand-copy">A focused operating dashboard for small-to-mid-size residential portfolios.</p>
+      </div>
+
+      <nav class="sidebar-nav" aria-label="Primary">
+        <button class="nav-chip active" data-section="overview">Overview</button>
+        <button class="nav-chip" data-section="portfolio">Portfolio</button>
+        <button class="nav-chip" data-section="operations">Operations</button>
+      </nav>
+
+      <section class="spotlight-card">
+        <p class="spotlight-label">This Month</p>
+        <h2 id="headline-collection-rate">0%</h2>
+        <p id="headline-collection-text">Collection status loading...</p>
+      </section>
+
+      <section class="quick-add-card">
+        <h2>Quick Add</h2>
+        <form id="quick-add-form">
+          <label>
+            <span>Record type</span>
+            <select id="entry-type" name="entryType">
+              <option value="tenant">Tenant</option>
+              <option value="maintenance">Maintenance</option>
+            </select>
+          </label>
+          <label>
+            <span>Name / title</span>
+            <input id="entry-name" name="entryName" type="text" placeholder="Avery Brooks" required>
+          </label>
+          <label>
+            <span>Property</span>
+            <select id="entry-property" name="entryProperty"></select>
+          </label>
+          <label id="entry-detail-wrapper">
+            <span>Unit / priority</span>
+            <input id="entry-detail" name="entryDetail" type="text" placeholder="Unit 3B" required>
+          </label>
+          <button type="submit" class="primary-action">Save entry</button>
+        </form>
+      </section>
+    </aside>
+
+    <main class="main-stage">
+      <header class="hero-panel">
+        <div>
+          <p class="eyebrow">Operations Snapshot</p>
+          <h2>Keep units full, rent on time, and issues moving.</h2>
+        </div>
+        <div class="hero-actions">
+          <label class="search-wrap">
+            <span class="sr-only">Search properties or tenants</span>
+            <input id="search-input" type="search" placeholder="Search properties, tenants, or units">
+          </label>
+          <select id="status-filter" aria-label="Filter units by occupancy">
+            <option value="all">All occupancy states</option>
+            <option value="occupied">Occupied</option>
+            <option value="vacant">Vacant</option>
+            <option value="notice">On notice</option>
+          </select>
+        </div>
+      </header>
+
+      <section class="metrics-grid" id="metrics-grid" aria-label="Key metrics"></section>
+
+      <section class="content-grid">
+        <section class="panel panel-large">
+          <div class="panel-heading">
+            <div>
+              <p class="eyebrow">Portfolio</p>
+              <h3>Property Performance</h3>
+            </div>
+            <p id="portfolio-summary" class="panel-note"></p>
+          </div>
+          <div id="property-list" class="property-list"></div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-heading">
+            <div>
+              <p class="eyebrow">Focus Property</p>
+              <h3 id="selected-property-title">Loading...</h3>
+            </div>
+            <p id="selected-property-meta" class="panel-note"></p>
+          </div>
+          <div id="selected-property-detail" class="detail-stack"></div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-heading">
+            <div>
+              <p class="eyebrow">Rent Ledger</p>
+              <h3>Collections</h3>
+            </div>
+            <p id="rent-summary" class="panel-note"></p>
+          </div>
+          <div id="payment-list" class="list-stack"></div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-heading">
+            <div>
+              <p class="eyebrow">Maintenance</p>
+              <h3>Open Requests</h3>
+            </div>
+            <p id="maintenance-summary" class="panel-note"></p>
+          </div>
+          <div id="maintenance-list" class="list-stack"></div>
+        </section>
+      </section>
+    </main>
+  </div>
+
+  <template id="metric-card-template">
+    <article class="metric-card">
+      <p class="metric-label"></p>
+      <h3 class="metric-value"></h3>
+      <p class="metric-meta"></p>
+    </article>
+  </template>
+
+  <script src="app.js"></script>
+</body>
+</html>

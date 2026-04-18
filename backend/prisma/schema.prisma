@@ -1,0 +1,100 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String      @id @default(cuid())
+  name         String
+  email        String      @unique
+  passwordHash String
+  properties    Property[]
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+}
+
+model Property {
+  id          String               @id @default(cuid())
+  name        String
+  address     String
+  city        String
+  ownerId     String
+  owner       User                 @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  units       Unit[]
+  maintenance MaintenanceRequest[]
+  createdAt   DateTime             @default(now())
+  updatedAt   DateTime             @updatedAt
+}
+
+model Unit {
+  id         String    @id @default(cuid())
+  label      String
+  status     UnitStatus
+  rent       Int
+  beds       Int
+  baths      Int
+  propertyId String
+  property   Property  @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  tenant     Tenant?
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+}
+
+model Tenant {
+  id         String    @id @default(cuid())
+  name       String
+  leaseEnd   DateTime
+  balance    Int       @default(0)
+  unitId     String    @unique
+  propertyId String
+  unit       Unit      @relation(fields: [unitId], references: [id], onDelete: Cascade)
+  property   Property  @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  payments   Payment[]
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+}
+
+model Payment {
+  id        String        @id @default(cuid())
+  amount    Int
+  dueDate   DateTime
+  status    PaymentStatus
+  tenantId  String
+  tenant    Tenant        @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+}
+
+model MaintenanceRequest {
+  id         String               @id @default(cuid())
+  title      String
+  priority   MaintenancePriority
+  status     String
+  unit       String
+  propertyId String
+  property   Property             @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  createdAt  DateTime             @default(now())
+  updatedAt  DateTime             @updatedAt
+}
+
+enum UnitStatus {
+  occupied
+  vacant
+  notice
+}
+
+enum PaymentStatus {
+  paid
+  partial
+  overdue
+}
+
+enum MaintenancePriority {
+  low
+  medium
+  high
+}
