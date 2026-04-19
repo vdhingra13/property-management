@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
 const defaultForm = {
@@ -8,11 +9,18 @@ const defaultForm = {
 };
 
 export default function LoginPage() {
-  const { login, register } = useAuth();
+  const { isAuthenticated, login, register } = useAuth();
+  const navigate = useNavigate();
   const [mode, setMode] = useState("login");
   const [form, setForm] = useState(defaultForm);
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate("/", { replace: true });
+    }
+  }, [isAuthenticated, navigate]);
 
   async function handleSubmit(event) {
     event.preventDefault();
@@ -25,6 +33,8 @@ export default function LoginPage() {
       } else {
         await register(form);
       }
+
+      navigate("/", { replace: true });
     } catch (err) {
       setError(err.message);
     } finally {
