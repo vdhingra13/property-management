@@ -14,8 +14,10 @@
     "render:build:frontend": "npm install && npm run build --workspace frontend",
     "render:build:backend": "npm install && npm run db:generate --workspace backend",
     "render:start:backend": "npm run start --workspace backend",
+    "render:db:push": "npm run db:push --workspace backend",
     "render:migrate": "npm run db:migrate:deploy --workspace backend",
     "db:generate": "npm run db:generate --workspace backend",
+    "db:push": "npm run db:push --workspace backend",
     "db:migrate": "npm run db:migrate --workspace backend",
     "db:seed": "npm run db:seed --workspace backend"
   }

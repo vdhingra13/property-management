@@ -294,6 +294,17 @@ npm run render:migrate
 
 This uses Prisma's production-safe migration command.
 
+### First-time database setup on Render
+
+Because this pilot project does not yet include committed Prisma migration files, the fastest first production setup is:
+
+```bash
+npm run render:db:push
+npm run db:seed
+```
+
+Use `db:push` once to create the schema on the Render Postgres database, then seed demo data if you want the starter login and portfolio data.
+
 ## Good Next Steps
 
 - Add owner, manager, and staff roles
