@@ -3,7 +3,13 @@ import { formatCurrency, formatDate } from "../utils/formatters.js";
 export function serializeDashboard(properties) {
   const flattenedUnits = properties.flatMap((property) => property.units);
   const flattenedPayments = properties.flatMap((property) =>
-    property.units.flatMap((unit) => unit.tenant?.payments || [])
+    property.units.flatMap((unit) =>
+      (unit.tenant?.payments || []).map((payment) => ({
+        ...payment,
+        tenantName: unit.tenant?.name || "Unknown tenant",
+        propertyName: property.name
+      }))
+    )
   );
   const maintenance = properties.flatMap((property) => property.maintenance);
 
@@ -71,8 +77,8 @@ export function serializeDashboard(properties) {
         status: payment.status,
         amountFormatted: formatCurrency(payment.amount),
         dueDateLabel: formatDate(payment.dueDate),
-        tenantName: payment.tenant.name,
-        propertyName: payment.tenant.property.name
+        tenantName: payment.tenantName,
+        propertyName: payment.propertyName
       })),
     maintenance: maintenance.slice(0, 6).map((request) => ({
       id: request.id,
