@@ -305,6 +305,18 @@ npm run db:seed
 
 Use `db:push` once to create the schema on the Render Postgres database, then seed demo data if you want the starter login and portfolio data.
 
+For Render free-tier deployments without shell access, the backend startup now runs:
+
+```bash
+npm run db:push && node src/bootstrap.js && node src/server.js
+```
+
+That means:
+
+- the schema is created automatically on startup
+- demo data is inserted automatically only if the database is empty
+- later restarts will skip seeding once users already exist
+
 ## Good Next Steps
 
 - Add owner, manager, and staff roles
