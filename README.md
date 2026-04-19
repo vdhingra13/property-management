@@ -5,7 +5,8 @@ Harbor PM is now scaffolded as a full-stack property management platform with:
 - `frontend/`: React + Vite application
 - `backend/`: Express API with JWT auth and Prisma
 - PostgreSQL via Docker Compose
-- Seeded portfolio, tenant, payment, and maintenance data
+- Seeded portfolio, tenant, lease, payment, and document-aware demo data
+- Configurable document storage with a local provider now and Google Cloud Storage planned next
 
 The original static prototype is still available at the repo root in `index.html`, `styles.css`, and `app.js` as a visual reference.
 
@@ -16,6 +17,7 @@ The original static prototype is still available at the repo root in `index.html
 - Auth: Email/password with `bcryptjs` and JWT bearer tokens
 - Database: PostgreSQL
 - ORM: Prisma
+- Files: Local pilot storage today, provider abstraction for future Google Cloud Storage
 
 ## Project Structure
 
@@ -75,6 +77,7 @@ Root workspace uses npm workspaces and will install packages for both `frontend`
 - `dotenv` `^16.4.5`
 - `express` `^4.21.1`
 - `jsonwebtoken` `^9.0.2`
+- `multer` `^1.4.5-lts.1`
 - `nodemon` `^3.1.7`
 - `prisma` `^5.22.0`
 
@@ -169,6 +172,8 @@ PORT=4000
 DATABASE_URL=postgresql://postgres:postgres@localhost:5432/harbor_pm?schema=public
 JWT_SECRET=replace-with-a-long-random-secret
 CLIENT_URL=http://localhost:5173
+STORAGE_PROVIDER=local
+LOCAL_UPLOAD_DIR=uploads
 ```
 
 ## Useful Commands
@@ -201,12 +206,56 @@ docker compose logs -f
 ## Implemented Features
 
 - Auth screens with register/login flow
-- Protected React dashboard route
-- Portfolio metrics and property drill-down
-- Tenants, rent ledger, and maintenance views
-- Quick-add actions for tenants and maintenance requests
-- PostgreSQL schema for users, properties, units, tenants, payments, and maintenance
-- Seed script matching the current dashboard demo data
+- Protected React management workspace route
+- Property creation and unit setup
+- Tenant registration with government ID and police verification fields
+- Lease creation with rent, deposit, and key commercial terms
+- Tenant and lease document uploads with storage metadata
+- PostgreSQL schema for users, properties, units, tenants, leases, payments, documents, and maintenance
+- Seed script matching the new setup workflow
+
+## Document Storage
+
+Document records are now split into:
+
+- file metadata in PostgreSQL
+- file bytes in a storage provider
+
+Current provider:
+
+- `local`
+
+Planned provider:
+
+- `gcs` for Google Cloud Storage
+
+### Why local first?
+
+This lets the pilot workflows work immediately without blocking on cloud bucket setup. The app already stores:
+
+- storage provider name
+- storage bucket/container
+- storage object key
+
+That means we can switch from local storage to Google Cloud Storage later without redesigning the data model.
+
+### Storage environment variables
+
+```env
+STORAGE_PROVIDER=local
+LOCAL_UPLOAD_DIR=uploads
+```
+
+### Google Cloud Storage handoff point
+
+The next infrastructure setup milestone is when you are ready to:
+
+1. create a Google Cloud Storage bucket
+2. create a service account with bucket access
+3. provide the bucket name and credentials securely
+4. switch `STORAGE_PROVIDER` from `local` to `gcs`
+
+Once you are ready for that, we will wire the real GCS provider into the existing storage abstraction.
 
 ## Server Deployment Notes
 
@@ -321,6 +370,7 @@ That means:
 
 - Add owner, manager, and staff roles
 - Switch from local token storage to secure HTTP-only cookies
-- Add CRUD screens for properties, leases, vendors, and documents
-- Add invoices, reminders, notifications, and reporting exports
+- Replace local document storage with Google Cloud Storage
+- Add payment ledger CRUD and reporting exports
+- Add lease renewals, move-out flow, and role-based permissions
 - Add tests for auth, dashboard serialization, and API routes

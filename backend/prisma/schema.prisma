@@ -13,19 +13,30 @@ model User {
   email        String      @unique
   passwordHash String
   properties    Property[]
+  documents    Document[]
   createdAt    DateTime    @default(now())
   updatedAt    DateTime    @updatedAt
 }
 
 model Property {
   id          String               @id @default(cuid())
+  code        String?
   name        String
   address     String
+  addressLine1 String?
+  addressLine2 String?
   city        String
+  state       String?
+  postalCode  String?
+  country     String?
+  propertyType String?
+  ownershipName String?
+  notes       String?
   ownerId     String
   owner       User                 @relation(fields: [ownerId], references: [id], onDelete: Cascade)
   units       Unit[]
   tenants     Tenant[]
+  leases      Lease[]
   maintenance MaintenanceRequest[]
   createdAt   DateTime             @default(now())
   updatedAt   DateTime             @updatedAt
@@ -38,9 +49,16 @@ model Unit {
   rent       Int
   beds       Int
   baths      Int
+  floor      String?
+  squareFeet Int?
+  marketRent Int?
+  securityDepositTarget Int?
+  availableFrom DateTime?
+  notes      String?
   propertyId String
   property   Property  @relation(fields: [propertyId], references: [id], onDelete: Cascade)
   tenant     Tenant?
+  leases     Lease[]
   createdAt  DateTime  @default(now())
   updatedAt  DateTime  @updatedAt
 }
@@ -48,6 +66,20 @@ model Unit {
 model Tenant {
   id         String    @id @default(cuid())
   name       String
+  preferredName String?
+  email      String?
+  phone      String?
+  alternatePhone String?
+  dateOfBirth DateTime?
+  governmentIdType String?
+  governmentIdNumber String?
+  governmentIdExpiry DateTime?
+  policeVerificationStatus PoliceVerificationStatus @default(pending)
+  policeVerificationDate DateTime?
+  emergencyContactName String?
+  emergencyContactPhone String?
+  permanentAddress String?
+  notes      String?
   leaseEnd   DateTime
   balance    Int       @default(0)
   unitId     String    @unique
@@ -55,8 +87,42 @@ model Tenant {
   unit       Unit      @relation(fields: [unitId], references: [id], onDelete: Cascade)
   property   Property  @relation(fields: [propertyId], references: [id], onDelete: Cascade)
   payments   Payment[]
+  leases     Lease[]
+  documents  Document[]
   createdAt  DateTime  @default(now())
   updatedAt  DateTime  @updatedAt
+}
+
+model Lease {
+  id                 String        @id @default(cuid())
+  propertyId         String
+  unitId             String
+  tenantId           String
+  status             LeaseStatus   @default(active)
+  startDate          DateTime
+  endDate            DateTime
+  moveInDate         DateTime?
+  moveOutDate        DateTime?
+  monthlyRent        Int
+  securityDeposit    Int
+  depositReceivedDate DateTime?
+  rentDueDay         Int
+  lateFeeType        String?
+  lateFeeAmount      Int?
+  billingFrequency   BillingFrequency @default(monthly)
+  renewalStatus      RenewalStatus @default(fixed_term)
+  noticePeriodDays   Int?
+  petTerms           String?
+  parkingTerms       String?
+  utilityResponsibility String?
+  notes              String?
+  property           Property      @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  unit               Unit          @relation(fields: [unitId], references: [id], onDelete: Cascade)
+  tenant             Tenant        @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  payments           Payment[]
+  documents          Document[]
+  createdAt          DateTime      @default(now())
+  updatedAt          DateTime      @updatedAt
 }
 
 model Payment {
@@ -65,9 +131,38 @@ model Payment {
   dueDate   DateTime
   status    PaymentStatus
   tenantId  String
+  leaseId   String?
+  amountDue Int?
+  amountPaid Int?
+  paidDate  DateTime?
+  paymentMethod String?
+  referenceNumber String?
+  lateFeeAmount Int?
+  notes     String?
   tenant    Tenant        @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  lease     Lease?        @relation(fields: [leaseId], references: [id], onDelete: SetNull)
   createdAt DateTime      @default(now())
   updatedAt DateTime      @updatedAt
+}
+
+model Document {
+  id              String          @id @default(cuid())
+  title           String
+  documentType    DocumentType
+  fileName        String
+  mimeType        String
+  fileSize        Int
+  storageProvider StorageProvider
+  storageKey      String
+  storageBucket   String?
+  tenantId        String?
+  leaseId         String?
+  uploadedById    String
+  uploadedBy      User            @relation(fields: [uploadedById], references: [id], onDelete: Cascade)
+  tenant          Tenant?         @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  lease           Lease?          @relation(fields: [leaseId], references: [id], onDelete: Cascade)
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
 }
 
 model MaintenanceRequest {
@@ -98,4 +193,47 @@ enum MaintenancePriority {
   low
   medium
   high
+}
+
+enum LeaseStatus {
+  active
+  pending
+  expired
+  terminated
+}
+
+enum RenewalStatus {
+  fixed_term
+  month_to_month
+  renewal_in_progress
+}
+
+enum BillingFrequency {
+  monthly
+  quarterly
+  annual
+}
+
+enum PoliceVerificationStatus {
+  pending
+  verified
+  failed
+  waived
+}
+
+enum DocumentType {
+  government_id_front
+  government_id_back
+  police_verification
+  address_proof
+  lease_signed
+  lease_addendum
+  move_in_checklist
+  deposit_receipt
+  other
+}
+
+enum StorageProvider {
+  local
+  gcs
 }

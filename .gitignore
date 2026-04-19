@@ -6,3 +6,4 @@ coverage
 frontend/dist
 backend/dist
 backend/prisma/dev.db
+backend/uploads

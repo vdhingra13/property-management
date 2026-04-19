@@ -11,23 +11,63 @@ router.get("/", requireAuth, async (request, response) => {
     include: {
       units: {
         include: {
-          tenant: {
-            include: {
-              payments: true,
-              property: true
-            }
-          }
-        }
+          tenant: true
+        },
+        orderBy: { label: "asc" }
       },
-      maintenance: {
-        include: {
-          property: true
-        }
-      }
+      leases: true
     }
   });
 
-  return response.json(serializeDashboard(properties));
+  const tenants = await prisma.tenant.findMany({
+    where: {
+      property: {
+        ownerId: request.user.id
+      }
+    },
+    include: {
+      property: true,
+      unit: true,
+      documents: true
+    },
+    orderBy: { createdAt: "desc" }
+  });
+
+  const leases = await prisma.lease.findMany({
+    where: {
+      property: {
+        ownerId: request.user.id
+      }
+    },
+    include: {
+      property: true,
+      unit: true,
+      tenant: true,
+      documents: true
+    },
+    orderBy: { createdAt: "desc" }
+  });
+
+  const documents = await prisma.document.findMany({
+    where: {
+      OR: [
+        { tenant: { property: { ownerId: request.user.id } } },
+        { lease: { property: { ownerId: request.user.id } } }
+      ]
+    },
+    include: {
+      tenant: true,
+      lease: {
+        include: {
+          property: true,
+          tenant: true
+        }
+      }
+    },
+    orderBy: { createdAt: "desc" }
+  });
+
+  return response.json(serializeDashboard({ properties, tenants, leases, documents }));
 });
 
 export default router;
